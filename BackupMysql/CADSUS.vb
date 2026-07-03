@@ -4,11 +4,11 @@ Imports System.Net.Http
 Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Threading.Tasks
+Imports System.Windows.Forms
 Imports iTextSharp.text
 Imports iTextSharp.text.pdf
 
 Public Class CADSUS
-    Dim m As New Main
     Private Async Function apiCADSUS(cpf As String) As Task(Of Paciente)
         ' 1. Limpa qualquer máscara (remove pontos, traços, espaços) mantendo apenas números
         Dim numeroLimpo As String = Regex.Replace(cpf, "[^\d]", "")
@@ -91,7 +91,7 @@ Public Class CADSUS
         Dim doc As XDocument = XDocument.Parse(xmlInterno)
         Dim retorno = doc...<retorno>.FirstOrDefault()
 
-        System.IO.File.WriteAllText("D:\Desktop\retorno.xml", xmlInterno)
+        ' System.IO.File.WriteAllText("D:\Desktop\retorno.xml", xmlInterno)
 
         If retorno Is Nothing Then
             Return Nothing
@@ -116,24 +116,6 @@ Public Class CADSUS
         Dim cadsus As New CADSUS()
         Return cadsus.apiCADSUS(cpf)
     End Function
-    'Public Shared Sub SUS_PDF(paciente As DadosPaciente)
-
-    '    Dim reader As New PdfReader(Application.StartupPath & "\PDF\ModeloSUS.pdf")
-    '    Dim stamper As New PdfStamper(reader, New FileStream(Application.StartupPath & $"\PDF\Gerados\{paciente.Nome}.pdf", FileMode.Create))
-    '    Dim campos = stamper.AcroFields
-
-    '    campos.SetField("nome_cabecalho", paciente.Nome & ",")
-    '    campos.SetField("nome_cartao", paciente.Nome)
-    '    campos.SetField("dtnasc", CDate(paciente.DataNascimento).ToString("dd/MM/yyyy"))
-    '    campos.SetField("sexo", paciente.Sexo)
-    '    campos.SetField("sus", FormatarCNS(paciente.CNS))
-    '    campos.SetField("cpf", FormatarCPF(paciente.CPF))
-
-    '    stamper.FormFlattening = True
-    '    stamper.Close()
-    '    reader.Close()
-
-    'End Sub
 
     Public Shared Function SUS_PDF(paciente As Paciente) As String
 
@@ -178,6 +160,11 @@ Public Class CADSUS
         Try
             'Consulta DataSUS
             Dim paciente As Paciente = Await consultaCADSUS(CPF)
+
+            If paciente Is Nothing Then
+                Throw New Exception("consultaCADSUS retornou Nothing")
+            End If
+
             paciente.Sexo = sexo
 
             If paciente Is Nothing Then

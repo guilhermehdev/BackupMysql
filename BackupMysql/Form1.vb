@@ -32,6 +32,8 @@ Public Class Form1
         trayIcon.Text = "Backup MySQL"
         trayIcon.Visible = True
 
+        PDFSERVER.Iniciar() ' Inicia o servidor HTTP para PDFSERVER
+
         ' Adiciona Menu ao Tray Icon
         Dim contextMenu As New ContextMenu()
         contextMenu.MenuItems.Add("Abrir", AddressOf AbrirAplicacao)

@@ -40,6 +40,8 @@ Public Class PDFSERVER
             Dim cpf As String = ctx.Request.QueryString("cpf")
             Dim sexo As String = ctx.Request.QueryString("sexo")
 
+            'IO.File.AppendAllText("C:\api.log", $"{DateTime.Now} CPF={cpf} SEXO={sexo}{Environment.NewLine}")
+
             If String.IsNullOrEmpty(cpf) Then
 
                 ctx.Response.StatusCode = 400
