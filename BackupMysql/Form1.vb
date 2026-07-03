@@ -41,6 +41,8 @@ Public Class Form1
             stsLabel.ForeColor = Color.Red
         End If
 
+        VerificarBackup()
+
         ' Adiciona Menu ao Tray Icon
         Dim contextMenu As New ContextMenu()
         contextMenu.MenuItems.Add("Abrir", AddressOf AbrirAplicacao)
@@ -77,7 +79,12 @@ Public Class Form1
             If backupHour = TimeSpan.Zero Then
                 ' Se não estiver definido, não faz nada
                 EscreverLog("Horário de backup não definido. Nenhuma ação será realizada.")
+                lbBACKUPsts.Text = "BACKUP AUTO OFF"
+                lbBACKUPsts.ForeColor = Color.Red
                 Return
+            Else
+                lbBACKUPsts.Text = "BACKUP AUTO ON"
+                lbBACKUPsts.ForeColor = Color.DeepSkyBlue
             End If
 
             ' Verifica se é a hora exata do backup
@@ -146,7 +153,15 @@ Public Class Form1
             My.Settings.usuarioDB = tbUsuario.Text
             My.Settings.senhaDB = tbSenha.Text
             My.Settings.DB = tbBanco.Text
-            My.Settings.backupTime = TimeSpan.Parse(tbHorarioBackup.Text)
+
+            If String.IsNullOrWhiteSpace(tbHorarioBackup.Text) OrElse tbHorarioBackup.Text = "  :" Then
+                My.Settings.backupTime = TimeSpan.Zero
+            Else
+                Dim horario As TimeSpan
+                If TimeSpan.TryParse(tbHorarioBackup.Text, horario) Then
+                    My.Settings.backupTime = horario
+                End If
+            End If
             My.Settings.Save()
             MsgBox("Configurações salvas! Reiniciando...")
             Application.Restart()

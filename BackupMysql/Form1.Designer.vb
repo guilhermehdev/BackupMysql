@@ -45,20 +45,21 @@ Partial Class Form1
         Me.btLog = New System.Windows.Forms.Button()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.lbCADSUSsts = New System.Windows.Forms.Label()
+        Me.lbBACKUPsts = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
         'backupTimer
         '
         Me.backupTimer.Enabled = True
-        Me.backupTimer.Interval = 60000
+        Me.backupTimer.Interval = 30000
         AddHandler Me.backupTimer.Tick, AddressOf Me.backupTimer_Tick_1
         '
         'tbMysqlDump
         '
         Me.tbMysqlDump.Location = New System.Drawing.Point(15, 36)
         Me.tbMysqlDump.Name = "tbMysqlDump"
-        Me.tbMysqlDump.Size = New System.Drawing.Size(307, 20)
+        Me.tbMysqlDump.Size = New System.Drawing.Size(351, 20)
         Me.tbMysqlDump.TabIndex = 1
         '
         'Label1
@@ -73,11 +74,14 @@ Partial Class Form1
         'btBuscar
         '
         Me.btBuscar.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.btBuscar.Location = New System.Drawing.Point(321, 35)
+        Me.btBuscar.Font = New System.Drawing.Font("Verdana", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btBuscar.ForeColor = System.Drawing.Color.Black
+        Me.btBuscar.Location = New System.Drawing.Point(365, 35)
         Me.btBuscar.Name = "btBuscar"
-        Me.btBuscar.Size = New System.Drawing.Size(24, 23)
-        Me.btBuscar.TabIndex = 4
-        Me.btBuscar.Text = "..."
+        Me.btBuscar.Size = New System.Drawing.Size(38, 22)
+        Me.btBuscar.TabIndex = 2
+        Me.btBuscar.Text = ". . ."
+        Me.btBuscar.TextAlign = System.Drawing.ContentAlignment.TopCenter
         Me.btBuscar.UseVisualStyleBackColor = True
         '
         'OpenFileDialog1
@@ -108,24 +112,27 @@ Partial Class Form1
         '
         'Button2
         '
+        Me.Button2.BackColor = System.Drawing.Color.DeepSkyBlue
         Me.Button2.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.Button2.ForeColor = System.Drawing.Color.Black
-        Me.Button2.Location = New System.Drawing.Point(306, 112)
+        Me.Button2.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
+        Me.Button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Button2.ForeColor = System.Drawing.Color.White
+        Me.Button2.Location = New System.Drawing.Point(311, 112)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(92, 23)
-        Me.Button2.TabIndex = 16
+        Me.Button2.TabIndex = 9
         Me.Button2.Text = "Backup"
-        Me.Button2.UseVisualStyleBackColor = True
+        Me.Button2.UseVisualStyleBackColor = False
         AddHandler Me.Button2.Click, AddressOf Me.Button2_Click
         '
         'Button1
         '
         Me.Button1.Cursor = System.Windows.Forms.Cursors.Hand
         Me.Button1.ForeColor = System.Drawing.Color.Black
-        Me.Button1.Location = New System.Drawing.Point(211, 112)
+        Me.Button1.Location = New System.Drawing.Point(210, 112)
         Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(93, 23)
-        Me.Button1.TabIndex = 15
+        Me.Button1.Size = New System.Drawing.Size(98, 23)
+        Me.Button1.TabIndex = 8
         Me.Button1.Text = "Salvar config"
         Me.Button1.UseVisualStyleBackColor = True
         AddHandler Me.Button1.Click, AddressOf Me.Button1_Click
@@ -136,7 +143,7 @@ Partial Class Form1
         Me.cbMostrarsenha.Location = New System.Drawing.Point(311, 77)
         Me.cbMostrarsenha.Name = "cbMostrarsenha"
         Me.cbMostrarsenha.Size = New System.Drawing.Size(74, 17)
-        Me.cbMostrarsenha.TabIndex = 14
+        Me.cbMostrarsenha.TabIndex = 5
         Me.cbMostrarsenha.Text = "Ver senha"
         Me.cbMostrarsenha.UseVisualStyleBackColor = True
         AddHandler Me.cbMostrarsenha.CheckedChanged, AddressOf Me.cbMostrarsenha_CheckedChanged
@@ -144,7 +151,7 @@ Partial Class Form1
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(345, 20)
+        Me.Label5.Location = New System.Drawing.Point(157, 97)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(41, 13)
         Me.Label5.TabIndex = 13
@@ -152,11 +159,11 @@ Partial Class Form1
         '
         'tbHorarioBackup
         '
-        Me.tbHorarioBackup.Location = New System.Drawing.Point(348, 36)
+        Me.tbHorarioBackup.Location = New System.Drawing.Point(159, 113)
         Me.tbHorarioBackup.Mask = "00:00"
         Me.tbHorarioBackup.Name = "tbHorarioBackup"
-        Me.tbHorarioBackup.Size = New System.Drawing.Size(50, 20)
-        Me.tbHorarioBackup.TabIndex = 12
+        Me.tbHorarioBackup.Size = New System.Drawing.Size(46, 20)
+        Me.tbHorarioBackup.TabIndex = 7
         Me.tbHorarioBackup.ValidatingType = GetType(Date)
         '
         'Label4
@@ -172,8 +179,8 @@ Partial Class Form1
         '
         Me.tbBanco.Location = New System.Drawing.Point(15, 113)
         Me.tbBanco.Name = "tbBanco"
-        Me.tbBanco.Size = New System.Drawing.Size(192, 20)
-        Me.tbBanco.TabIndex = 9
+        Me.tbBanco.Size = New System.Drawing.Size(139, 20)
+        Me.tbBanco.TabIndex = 6
         '
         'Label3
         '
@@ -190,7 +197,7 @@ Partial Class Form1
         Me.tbSenha.Name = "tbSenha"
         Me.tbSenha.PasswordChar = Global.Microsoft.VisualBasic.ChrW(42)
         Me.tbSenha.Size = New System.Drawing.Size(132, 20)
-        Me.tbSenha.TabIndex = 7
+        Me.tbSenha.TabIndex = 4
         Me.tbSenha.UseSystemPasswordChar = True
         '
         'Label2
@@ -207,27 +214,30 @@ Partial Class Form1
         Me.tbUsuario.Location = New System.Drawing.Point(15, 75)
         Me.tbUsuario.Name = "tbUsuario"
         Me.tbUsuario.Size = New System.Drawing.Size(153, 20)
-        Me.tbUsuario.TabIndex = 5
+        Me.tbUsuario.TabIndex = 3
         '
         'btFechar
         '
+        Me.btFechar.BackColor = System.Drawing.Color.IndianRed
         Me.btFechar.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.btFechar.ForeColor = System.Drawing.Color.Black
+        Me.btFechar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
+        Me.btFechar.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btFechar.ForeColor = System.Drawing.Color.White
         Me.btFechar.Location = New System.Drawing.Point(347, 181)
         Me.btFechar.Name = "btFechar"
         Me.btFechar.Size = New System.Drawing.Size(75, 23)
-        Me.btFechar.TabIndex = 6
+        Me.btFechar.TabIndex = 11
         Me.btFechar.Text = "Fechar"
-        Me.btFechar.UseVisualStyleBackColor = True
+        Me.btFechar.UseVisualStyleBackColor = False
         '
         'btLog
         '
         Me.btLog.Cursor = System.Windows.Forms.Cursors.Hand
         Me.btLog.ForeColor = System.Drawing.Color.Black
-        Me.btLog.Location = New System.Drawing.Point(298, 181)
+        Me.btLog.Location = New System.Drawing.Point(303, 181)
         Me.btLog.Name = "btLog"
         Me.btLog.Size = New System.Drawing.Size(43, 23)
-        Me.btLog.TabIndex = 7
+        Me.btLog.TabIndex = 10
         Me.btLog.Text = "Log"
         Me.btLog.UseVisualStyleBackColor = True
         AddHandler Me.btLog.Click, AddressOf Me.btLog_Click
@@ -244,11 +254,22 @@ Partial Class Form1
         'lbCADSUSsts
         '
         Me.lbCADSUSsts.AutoSize = True
+        Me.lbCADSUSsts.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbCADSUSsts.Location = New System.Drawing.Point(12, 186)
         Me.lbCADSUSsts.Name = "lbCADSUSsts"
-        Me.lbCADSUSsts.Size = New System.Drawing.Size(121, 13)
+        Me.lbCADSUSsts.Size = New System.Drawing.Size(104, 12)
         Me.lbCADSUSsts.TabIndex = 9
         Me.lbCADSUSsts.Text = "CADSUS PDF STATUS"
+        '
+        'lbBACKUPsts
+        '
+        Me.lbBACKUPsts.AutoSize = True
+        Me.lbBACKUPsts.Font = New System.Drawing.Font("Microsoft Sans Serif", 6.5!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbBACKUPsts.Location = New System.Drawing.Point(116, 186)
+        Me.lbBACKUPsts.Name = "lbBACKUPsts"
+        Me.lbBACKUPsts.Size = New System.Drawing.Size(110, 12)
+        Me.lbBACKUPsts.TabIndex = 10
+        Me.lbBACKUPsts.Text = "BACKUP AUTO STATUS"
         '
         'Form1
         '
@@ -256,6 +277,7 @@ Partial Class Form1
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(434, 214)
+        Me.Controls.Add(Me.lbBACKUPsts)
         Me.Controls.Add(Me.lbCADSUSsts)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.btLog)
@@ -298,4 +320,5 @@ Partial Class Form1
     Friend WithEvents Button2 As Windows.Forms.Button
     Friend WithEvents Label6 As Windows.Forms.Label
     Friend WithEvents lbCADSUSsts As Windows.Forms.Label
+    Friend WithEvents lbBACKUPsts As Windows.Forms.Label
 End Class
