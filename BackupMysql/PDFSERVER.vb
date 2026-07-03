@@ -1,4 +1,5 @@
-﻿Imports System.Net
+﻿Imports System.Drawing
+Imports System.Net
 Imports System.Text
 Imports System.Threading
 Imports System.Threading.Tasks
@@ -7,17 +8,21 @@ Public Class PDFSERVER
 
     Private Shared listener As HttpListener
 
-    Public Shared Sub Iniciar()
+    Public Shared Function Iniciar()
+        Try
+            listener = New HttpListener()
 
-        listener = New HttpListener()
+            listener.Prefixes.Add("http://+:8080/")
 
-        listener.Prefixes.Add("http://+:8080/")
+            listener.Start()
 
-        listener.Start()
+            Task.Run(AddressOf AguardarRequisicoes)
+            Return True
+        Catch ex As Exception
+            Return False
+        End Try
 
-        Task.Run(AddressOf AguardarRequisicoes)
-
-    End Sub
+    End Function
 
     Private Shared Async Function AguardarRequisicoes() As Task
 

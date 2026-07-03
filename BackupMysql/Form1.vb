@@ -1,4 +1,5 @@
-﻿Imports System.IO
+﻿Imports System.Drawing
+Imports System.IO
 Imports System.Windows.Forms
 
 Public Class Form1
@@ -26,13 +27,19 @@ Public Class Form1
         End Try
     End Sub
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        ' Inicializa o Tray Icon
+        Dim stsLabel = lbCADSUSsts
         trayIcon = New NotifyIcon()
         trayIcon.Icon = My.Resources.icon3
         trayIcon.Text = "Backup MySQL"
         trayIcon.Visible = True
 
-        PDFSERVER.Iniciar() ' Inicia o servidor HTTP para PDFSERVER
+        If PDFSERVER.Iniciar() Then
+            stsLabel.Text = "CADSUS PDF ON"
+            stsLabel.ForeColor = Color.LimeGreen
+        Else
+            stsLabel.Text = "CADSUS PDF OFF"
+            stsLabel.ForeColor = Color.Red
+        End If
 
         ' Adiciona Menu ao Tray Icon
         Dim contextMenu As New ContextMenu()

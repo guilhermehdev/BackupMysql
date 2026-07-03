@@ -44,6 +44,7 @@ Partial Class Form1
         Me.btFechar = New System.Windows.Forms.Button()
         Me.btLog = New System.Windows.Forms.Button()
         Me.Label6 = New System.Windows.Forms.Label()
+        Me.lbCADSUSsts = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -240,12 +241,22 @@ Partial Class Form1
         Me.Label6.TabIndex = 8
         Me.Label6.Text = "Backup automático"
         '
+        'lbCADSUSsts
+        '
+        Me.lbCADSUSsts.AutoSize = True
+        Me.lbCADSUSsts.Location = New System.Drawing.Point(12, 186)
+        Me.lbCADSUSsts.Name = "lbCADSUSsts"
+        Me.lbCADSUSsts.Size = New System.Drawing.Size(121, 13)
+        Me.lbCADSUSsts.TabIndex = 9
+        Me.lbCADSUSsts.Text = "CADSUS PDF STATUS"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(434, 214)
+        Me.Controls.Add(Me.lbCADSUSsts)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.btLog)
         Me.Controls.Add(Me.btFechar)
@@ -263,6 +274,7 @@ Partial Class Form1
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
     Friend WithEvents backupTimer As Windows.Forms.Timer
@@ -285,4 +297,5 @@ Partial Class Form1
     Friend WithEvents Button1 As Windows.Forms.Button
     Friend WithEvents Button2 As Windows.Forms.Button
     Friend WithEvents Label6 As Windows.Forms.Label
+    Friend WithEvents lbCADSUSsts As Windows.Forms.Label
 End Class
