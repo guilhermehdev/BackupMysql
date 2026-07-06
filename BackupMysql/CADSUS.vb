@@ -124,7 +124,7 @@ Public Class CADSUS
         Dim stamper As New PdfStamper(reader, New FileStream(arquivoDestino, FileMode.Create))
         Dim campos = stamper.AcroFields
 
-        campos.SetField("nome_cabecalho", paciente.Nome & ",")
+        campos.SetField("nome_cabecalho", If(paciente.Sexo = "F", "Sra. " & paciente.Nome, "Sr. " & paciente.Nome))
         campos.SetField("nome_cartao", paciente.Nome)
         campos.SetField("dtnasc", CDate(paciente.DataNascimento).ToString("dd/MM/yyyy"))
         campos.SetField("sexo", paciente.Sexo)
