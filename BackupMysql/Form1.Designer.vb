@@ -52,7 +52,7 @@ Partial Class Form1
         'backupTimer
         '
         Me.backupTimer.Enabled = True
-        Me.backupTimer.Interval = 30000
+        Me.backupTimer.Interval = 31000
         AddHandler Me.backupTimer.Tick, AddressOf Me.backupTimer_Tick_1
         '
         'tbMysqlDump

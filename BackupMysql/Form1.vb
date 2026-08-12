@@ -22,6 +22,7 @@ Public Class Form1
 
             EscreverLog("Backup manual concluído e enviado para o Google Drive.")
             EscreverLog("Backup concluído com sucesso!")
+
         Catch ex As Exception
             EscreverLog($"Erro ao realizar o backup: {ex.Message}")
         End Try
@@ -71,6 +72,7 @@ Public Class Form1
     End Sub
 
     Private Sub VerificarBackup()
+
         Try
             Dim agora As TimeSpan = DateTime.Now.TimeOfDay
             Dim backupHour As TimeSpan = My.Settings.backupTime
@@ -93,6 +95,7 @@ Public Class Form1
                 EscreverLog("Iniciando o backup automático...")
                 Backup()
             End If
+
         Catch ex As Exception
             EscreverLog("Erro em VerificarBackup: " & ex.Message)
         End Try
