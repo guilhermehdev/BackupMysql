@@ -5,28 +5,52 @@ Imports System.Windows.Forms
 Public Class Form1
     Private trayIcon As NotifyIcon
     Private backupHour As TimeSpan = My.Settings.backupTime
+    Private backupEmExecucao As Boolean = False
+    Private ultimoBackupAutomatico As String = ""
+
     Dim usuario As String = My.Settings.usuarioDB
     Dim senha As String = My.Settings.senhaDB
     Dim banco As String = My.Settings.DB
     Dim caminhoMysqlDump As String = My.Settings.mySQLDumpPath
     Dim google As New GoogleDriveUploader
+
     Private Sub Backup()
         EscreverLog("Backup solicitado.")
-        Try
 
+        If backupEmExecucao Then
+            EscreverLog("Backup ignorado: já existe um backup em execução.")
+            Return
+        End If
+
+        backupEmExecucao = True
+
+        Try
             Dim backupPath As String = BackupMySQL.CriarBackup()
 
+            If String.IsNullOrWhiteSpace(backupPath) OrElse Not File.Exists(backupPath) Then
+                Throw New Exception("O backup não foi criado corretamente.")
+            End If
+
             google.EnviarParaGoogleDrive(backupPath)
-            File.Delete(Path.ChangeExtension(backupPath, "sql"))
-            File.Delete(Path.ChangeExtension(backupPath, "zip"))
+
+            If File.Exists(Path.ChangeExtension(backupPath, "sql")) Then
+                File.Delete(Path.ChangeExtension(backupPath, "sql"))
+            End If
+
+            If File.Exists(Path.ChangeExtension(backupPath, "zip")) Then
+                File.Delete(Path.ChangeExtension(backupPath, "zip"))
+            End If
 
             EscreverLog("Backup manual concluído e enviado para o Google Drive.")
             EscreverLog("Backup concluído com sucesso!")
 
         Catch ex As Exception
             EscreverLog($"Erro ao realizar o backup: {ex.Message}")
+        Finally
+            backupEmExecucao = False
         End Try
     End Sub
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Dim stsLabel = lbCADSUSsts
         trayIcon = New NotifyIcon()
@@ -72,14 +96,12 @@ Public Class Form1
     End Sub
 
     Private Sub VerificarBackup()
-
         Try
             Dim agora As TimeSpan = DateTime.Now.TimeOfDay
             Dim backupHour As TimeSpan = My.Settings.backupTime
 
             ' Verifica se o horário de backup está definido
             If backupHour = TimeSpan.Zero Then
-                ' Se não estiver definido, não faz nada
                 EscreverLog("Horário de backup não definido. Nenhuma ação será realizada.")
                 lbBACKUPsts.Text = "BACKUP AUTO OFF"
                 lbBACKUPsts.ForeColor = Color.Red
@@ -89,9 +111,43 @@ Public Class Form1
                 lbBACKUPsts.ForeColor = Color.DeepSkyBlue
             End If
 
-            ' Verifica se é a hora exata do backup
-            ' Permite uma margem de 59 segundos para evitar problemas de tempo
+            ' Executa somente dentro da janela de 1 minuto do horário configurado.
             If agora >= backupHour AndAlso agora < backupHour.Add(TimeSpan.FromMinutes(1)) Then
+
+                ' Identificador único para aquele horário naquele dia.
+                Dim chaveBackup As String = DateTime.Now.ToString("yyyy-MM-dd_HH-mm")
+
+                ' Impede que os próximos ticks do timer executem novamente o mesmo backup.
+                If ultimoBackupAutomatico = chaveBackup Then
+                    Return
+                End If
+
+                ' Persiste a última execução automática para evitar duplicidade após reinício.
+                Dim caminhoControle As String = Path.Combine(Application.StartupPath, "backup", "ultimo_backup_automatico.txt")
+
+                If File.Exists(caminhoControle) Then
+                    Dim ultimoRegistrado As String = File.ReadAllText(caminhoControle).Trim()
+                    If ultimoRegistrado = chaveBackup Then
+                        ultimoBackupAutomatico = chaveBackup
+                        Return
+                    End If
+                End If
+
+                If backupEmExecucao Then
+                    EscreverLog("Backup automático ignorado: já existe um backup em execução.")
+                    Return
+                End If
+
+                ' Marca antes de iniciar para impedir uma segunda execução.
+                ultimoBackupAutomatico = chaveBackup
+
+                Dim pastaBackup As String = Path.Combine(Application.StartupPath, "backup")
+                If Not Directory.Exists(pastaBackup) Then
+                    Directory.CreateDirectory(pastaBackup)
+                End If
+
+                File.WriteAllText(caminhoControle, chaveBackup)
+
                 EscreverLog("Iniciando o backup automático...")
                 Backup()
             End If
@@ -100,14 +156,13 @@ Public Class Form1
             EscreverLog("Erro em VerificarBackup: " & ex.Message)
         End Try
     End Sub
+
     Private Sub AbrirAplicacao(sender As Object, e As EventArgs)
-        ' Mostra o formulário (se necessário)
         Me.Show()
         Me.WindowState = FormWindowState.Normal
     End Sub
 
     Private Sub SairAplicacao(sender As Object, e As EventArgs)
-        ' Encerra a aplicação
         trayIcon.Visible = False
         Application.Exit()
     End Sub
@@ -140,6 +195,7 @@ Public Class Form1
     Private Sub btFechar_Click(sender As Object, e As EventArgs) Handles btFechar.Click
         Me.Hide()
     End Sub
+
     Private Sub cbMostrarsenha_CheckedChanged(sender As Object, e As EventArgs)
         If cbMostrarsenha.Checked Then
             tbSenha.PasswordChar = ""
@@ -148,7 +204,6 @@ Public Class Form1
             tbSenha.PasswordChar = "*"
             tbSenha.UseSystemPasswordChar = True
         End If
-
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs)
@@ -172,14 +227,11 @@ Public Class Form1
             MsgBox("Preencha todos os campos")
         End If
     End Sub
+
     Private Sub btLog_Click(sender As Object, e As EventArgs)
         Try
-            ' Substitua pelo caminho real do seu arquivo
             Dim caminhoArquivo As String = Application.StartupPath & "\backup\backup_log.txt"
-
-            ' Abre o arquivo no programa padrão do Windows (geralmente Bloco de Notas)
             Process.Start(New ProcessStartInfo(caminhoArquivo) With {.UseShellExecute = True})
-
         Catch ex As Exception
             MessageBox.Show("Erro ao abrir o arquivo: " & ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
@@ -189,7 +241,7 @@ Public Class Form1
         Backup()
     End Sub
 
-    Private Sub backupTimer_Tick_1(sender As Object, e As EventArgs)
+    Private Sub backupTimer_Tick_1(sender As Object, e As EventArgs) Handles backupTimer.Tick
         VerificarBackup()
     End Sub
 
