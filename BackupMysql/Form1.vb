@@ -1,55 +1,11 @@
 ﻿Imports System.Drawing
+Imports System.Globalization
 Imports System.IO
 Imports System.Windows.Forms
 
 Public Class Form1
     Private trayIcon As NotifyIcon
-    Private backupHour As TimeSpan = My.Settings.backupTime
-    Private backupEmExecucao As Boolean = False
-    Private ultimoBackupAutomatico As String = ""
 
-    Dim usuario As String = My.Settings.usuarioDB
-    Dim senha As String = My.Settings.senhaDB
-    Dim banco As String = My.Settings.DB
-    Dim caminhoMysqlDump As String = My.Settings.mySQLDumpPath
-    Dim google As New GoogleDriveUploader
-
-    Private Sub Backup()
-        EscreverLog("Backup solicitado.")
-
-        If backupEmExecucao Then
-            EscreverLog("Backup ignorado: já existe um backup em execução.")
-            Return
-        End If
-
-        backupEmExecucao = True
-
-        Try
-            Dim backupPath As String = BackupMySQL.CriarBackup()
-
-            If String.IsNullOrWhiteSpace(backupPath) OrElse Not File.Exists(backupPath) Then
-                Throw New Exception("O backup não foi criado corretamente.")
-            End If
-
-            google.EnviarParaGoogleDrive(backupPath)
-
-            If File.Exists(Path.ChangeExtension(backupPath, "sql")) Then
-                File.Delete(Path.ChangeExtension(backupPath, "sql"))
-            End If
-
-            If File.Exists(Path.ChangeExtension(backupPath, "zip")) Then
-                File.Delete(Path.ChangeExtension(backupPath, "zip"))
-            End If
-
-            EscreverLog("Backup manual concluído e enviado para o Google Drive.")
-            EscreverLog("Backup concluído com sucesso!")
-
-        Catch ex As Exception
-            EscreverLog($"Erro ao realizar o backup: {ex.Message}")
-        Finally
-            backupEmExecucao = False
-        End Try
-    End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Dim stsLabel = lbCADSUSsts
@@ -66,8 +22,6 @@ Public Class Form1
             stsLabel.ForeColor = Color.Red
         End If
 
-        VerificarBackup()
-
         ' Adiciona Menu ao Tray Icon
         Dim contextMenu As New ContextMenu()
         contextMenu.MenuItems.Add("Abrir", AddressOf AbrirAplicacao)
@@ -75,86 +29,20 @@ Public Class Form1
         trayIcon.ContextMenu = contextMenu
         AddHandler trayIcon.DoubleClick, AddressOf AbrirAplicacao
 
-        tbMysqlDump.Text = My.Settings.mySQLDumpPath
-        tbUsuario.Text = My.Settings.usuarioDB
-        tbSenha.Text = My.Settings.senhaDB
-        tbBanco.Text = My.Settings.DB
-        tbHorarioBackup.Text = My.Settings.backupTime.ToString("hh\:mm")
+        Dim configuracao = BackupConfiguration.Atual
+        tbMysqlDump.Text = configuracao.MySQLDumpPath
+        tbUsuario.Text = configuracao.UsuarioDB
+        tbSenha.Text = configuracao.SenhaDB
+        tbBanco.Text = configuracao.DB
+        tbHorarioBackup.Text = configuracao.BackupTime.ToString("hh\:mm")
 
-        If My.Settings.mySQLDumpPath = "" Or My.Settings.usuarioDB = "" Or My.Settings.senhaDB = "" Or My.Settings.DB = "" Then
-            MsgBox("Configurações necessárias")
-            Me.WindowState = FormWindowState.Normal
-        Else
-            Me.Hide()
-            Me.ShowInTaskbar = False
-            ' Inicializa o Timer
-            backupTimer.Start()
-            ' Log
-            EscreverLog("Aplicação iniciada e rodando em segundo plano.")
-        End If
+        backupTimer.Stop()
+        backupTimer.Enabled = False
+        Me.WindowState = FormWindowState.Normal
+        Me.ShowInTaskbar = True
+        lbBACKUPsts.Text = "AGENDAMENTO PELO SERVIÇO"
+        lbBACKUPsts.ForeColor = Color.DeepSkyBlue
 
-    End Sub
-
-    Private Sub VerificarBackup()
-        Try
-            Dim agora As TimeSpan = DateTime.Now.TimeOfDay
-            Dim backupHour As TimeSpan = My.Settings.backupTime
-
-            ' Verifica se o horário de backup está definido
-            If backupHour = TimeSpan.Zero Then
-                EscreverLog("Horário de backup não definido. Nenhuma ação será realizada.")
-                lbBACKUPsts.Text = "BACKUP AUTO OFF"
-                lbBACKUPsts.ForeColor = Color.Red
-                Return
-            Else
-                lbBACKUPsts.Text = "BACKUP AUTO ON"
-                lbBACKUPsts.ForeColor = Color.DeepSkyBlue
-            End If
-
-            ' Executa somente dentro da janela de 1 minuto do horário configurado.
-            If agora >= backupHour AndAlso agora < backupHour.Add(TimeSpan.FromMinutes(1)) Then
-
-                ' Identificador único para aquele horário naquele dia.
-                Dim chaveBackup As String = DateTime.Now.ToString("yyyy-MM-dd_HH-mm")
-
-                ' Impede que os próximos ticks do timer executem novamente o mesmo backup.
-                If ultimoBackupAutomatico = chaveBackup Then
-                    Return
-                End If
-
-                ' Persiste a última execução automática para evitar duplicidade após reinício.
-                Dim caminhoControle As String = Path.Combine(Application.StartupPath, "backup", "ultimo_backup_automatico.txt")
-
-                If File.Exists(caminhoControle) Then
-                    Dim ultimoRegistrado As String = File.ReadAllText(caminhoControle).Trim()
-                    If ultimoRegistrado = chaveBackup Then
-                        ultimoBackupAutomatico = chaveBackup
-                        Return
-                    End If
-                End If
-
-                If backupEmExecucao Then
-                    EscreverLog("Backup automático ignorado: já existe um backup em execução.")
-                    Return
-                End If
-
-                ' Marca antes de iniciar para impedir uma segunda execução.
-                ultimoBackupAutomatico = chaveBackup
-
-                Dim pastaBackup As String = Path.Combine(Application.StartupPath, "backup")
-                If Not Directory.Exists(pastaBackup) Then
-                    Directory.CreateDirectory(pastaBackup)
-                End If
-
-                File.WriteAllText(caminhoControle, chaveBackup)
-
-                EscreverLog("Iniciando o backup automático...")
-                Backup()
-            End If
-
-        Catch ex As Exception
-            EscreverLog("Erro em VerificarBackup: " & ex.Message)
-        End Try
     End Sub
 
     Private Sub AbrirAplicacao(sender As Object, e As EventArgs)
@@ -168,17 +56,7 @@ Public Class Form1
     End Sub
 
     Public Sub EscreverLog(mensagem As String)
-        Dim logPath As String = Application.StartupPath & "\backup\backup_log.txt"
-        Dim logDir As String = Path.GetDirectoryName(logPath)
-
-        Try
-            If Not Directory.Exists(logDir) Then
-                Directory.CreateDirectory(logDir)
-            End If
-            File.AppendAllText(logPath, $"{DateTime.Now}: {mensagem}{Environment.NewLine}")
-        Catch ex As Exception
-            ' Log de erro silencioso
-        End Try
+        BackupLogger.Escrever(mensagem)
     End Sub
 
     Private Sub btBuscar_Click(sender As Object, e As EventArgs) Handles btBuscar.Click
@@ -186,8 +64,8 @@ Public Class Form1
 
         If OpenFileDialog1.ShowDialog Then
             tbMysqlDump.Text = OpenFileDialog1.FileName
-            My.Settings.mySQLDumpPath = OpenFileDialog1.FileName
-            My.Settings.Save()
+            BackupConfiguration.Atual.MySQLDumpPath = OpenFileDialog1.FileName
+            BackupConfiguration.Atual.Salvar()
             MsgBox("Salvo!")
         End If
     End Sub
@@ -208,21 +86,29 @@ Public Class Form1
 
     Private Sub Button1_Click(sender As Object, e As EventArgs)
         If tbUsuario.Text <> "" And tbSenha.Text <> "" And tbBanco.Text <> "" Then
-            My.Settings.usuarioDB = tbUsuario.Text
-            My.Settings.senhaDB = tbSenha.Text
-            My.Settings.DB = tbBanco.Text
+            Dim configuracao = BackupConfiguration.Atual
+            configuracao.UsuarioDB = tbUsuario.Text
+            configuracao.SenhaDB = tbSenha.Text
+            configuracao.DB = tbBanco.Text
 
-            If String.IsNullOrWhiteSpace(tbHorarioBackup.Text) OrElse tbHorarioBackup.Text = "  :" Then
-                My.Settings.backupTime = TimeSpan.Zero
+            Dim textoHorario As String = tbHorarioBackup.Text.Trim()
+            EscreverLog("Texto do horário recebido: [" & textoHorario & "]")
+
+            If String.IsNullOrWhiteSpace(textoHorario) OrElse textoHorario = ":" OrElse textoHorario = "  :" Then
+                configuracao.BackupTime = TimeSpan.Zero
             Else
-                Dim horario As TimeSpan
-                If TimeSpan.TryParse(tbHorarioBackup.Text, horario) Then
-                    My.Settings.backupTime = horario
+                Dim horarioInformado As DateTime
+                If DateTime.TryParseExact(textoHorario, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, horarioInformado) Then
+                    configuracao.BackupTime = New TimeSpan(horarioInformado.Hour, horarioInformado.Minute, 0)
+                Else
+                    MessageBox.Show("Informe um horário válido no formato HH:mm, por exemplo 23:30.", "Horário inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    tbHorarioBackup.Focus()
+                    Return
                 End If
             End If
-            My.Settings.Save()
-            MsgBox("Configurações salvas! Reiniciando...")
-            Application.Restart()
+            configuracao.Salvar()
+            EscreverLog("Configuração compartilhada salva. Horário: " & configuracao.BackupTime.ToString("hh\:mm"))
+            MsgBox("Configurações salvas. O serviço aplicará o novo horário automaticamente.")
         Else
             MsgBox("Preencha todos os campos")
         End If
@@ -238,11 +124,11 @@ Public Class Form1
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs)
-        Backup()
+        MessageBox.Show("O backup automático é executado pelo serviço BackupMySQL.", "BackupMySQL", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
     Private Sub backupTimer_Tick_1(sender As Object, e As EventArgs) Handles backupTimer.Tick
-        VerificarBackup()
+        ' O agendamento pertence exclusivamente ao serviço do Windows.
     End Sub
 
 End Class

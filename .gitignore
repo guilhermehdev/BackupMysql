@@ -256,6 +256,13 @@ Generated_Code/
 # because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
+!BackupMysql/BackupLogger.vb
+!BackupMysql/BackupManager.vb
+!BackupMysql/BackupConfiguration.vb
+!BackupMysql.Service/
+!BackupMysql.Service/*.vbproj
+!BackupMysql.Service/*.vb
+!BackupMysql.Service/App.config
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/

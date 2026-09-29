@@ -1,23 +1,23 @@
 ﻿Imports System.IO
 Imports System.IO.Compression
-Imports System.Windows.Forms
 
 Public Class BackupMySQL
 
     Public Shared Function CriarBackup() As String
-        If Not Directory.Exists(Application.StartupPath & "\backup") Then
-            Directory.CreateDirectory(Application.StartupPath & "\backup")
+        Dim configuracao = BackupConfiguration.Atual
+        If Not Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backup")) Then
+            Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backup"))
         End If
         Dim dataAtual As String = DateTime.Now.ToString("dd-MM-yyyy_HH-mm")
-        Dim caminhoBackup = Application.StartupPath & $"\backup\AME-{dataAtual}.sql"
+        Dim caminhoBackup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backup", String.Format("AME-{0}.sql", dataAtual))
         ' Substitui vírgulas por espaços para os bancos e remove espaços extras
-        Dim bancosParaBackup As String = String.Join(" ", My.Settings.DB.Split(","c).Select(Function(b) b.Trim()).Where(Function(b) Not String.IsNullOrEmpty(b)))
+        Dim bancosParaBackup As String = String.Join(" ", configuracao.DB.Split(","c).Select(Function(b) b.Trim()).Where(Function(b) Not String.IsNullOrEmpty(b)))
 
         Try
 
             Dim processo As New Process()
-            processo.StartInfo.FileName = My.Settings.mySQLDumpPath
-            processo.StartInfo.Arguments = $"--user={My.Settings.usuarioDB} --password={My.Settings.senhaDB} --host=localhost --skip-lock-tables --databases {bancosParaBackup} --result-file=""{caminhoBackup}"""
+            processo.StartInfo.FileName = configuracao.MySQLDumpPath
+            processo.StartInfo.Arguments = String.Format("--user={0} --password={1} --host=localhost --skip-lock-tables --databases {2} --result-file=""{3}""", configuracao.UsuarioDB, configuracao.SenhaDB, bancosParaBackup, caminhoBackup)
             processo.StartInfo.RedirectStandardOutput = True
             processo.StartInfo.RedirectStandardError = True
             processo.StartInfo.UseShellExecute = False
@@ -29,11 +29,11 @@ Public Class BackupMySQL
                 Return CompactarBackup(caminhoBackup)
             Else
                 Dim erro As String = processo.StandardError.ReadToEnd()
-                Form1.EscreverLog("Erro no processo mysqldump: " & erro)
+                BackupLogger.Escrever("Erro no processo mysqldump: " & erro)
                 Return Nothing
             End If
         Catch ex As Exception
-            Form1.EscreverLog("Erro em CriarBackup: " & ex.Message)
+            BackupLogger.Escrever("Erro em CriarBackup: " & ex.ToString())
             Return False
         End Try
     End Function
@@ -54,7 +54,7 @@ Public Class BackupMySQL
             Return caminhoZip
 
         Catch ex As Exception
-            Form1.EscreverLog("erro ao CompactarBackup" & ex.Message)
+            BackupLogger.Escrever("Erro ao CompactarBackup: " & ex.ToString())
             Return String.Empty
         End Try
     End Function

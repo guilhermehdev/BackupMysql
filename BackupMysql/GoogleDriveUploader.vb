@@ -10,7 +10,7 @@ Public Class GoogleDriveUploader
 
     Public Sub EnviarParaGoogleDrive(filePath As String)
         Try
-            Form1.EscreverLog("Iniciando upload para o Google Drive: " & filePath)
+            BackupLogger.Escrever("Iniciando upload para o Google Drive: " & filePath)
 
             ' Verifica se o arquivo existe
             If Not File.Exists(filePath) Then
@@ -37,13 +37,13 @@ Public Class GoogleDriveUploader
 
                 ' Obter resposta do upload
                 Dim fileUploaded = request.ResponseBody
-                Form1.EscreverLog("Upload concluído. ID do arquivo: " & fileUploaded.Id)
+                BackupLogger.Escrever("Upload concluído. ID do arquivo: " & fileUploaded.Id)
             End Using
 
             'File.Delete(Path.ChangeExtension(filePath, "sql"))
 
         Catch ex As Exception
-            Form1.EscreverLog("Erro ao enviar arquivo para o Google Drive: " & ex.Message)
+            BackupLogger.Escrever("Erro ao enviar arquivo para o Google Drive: " & ex.Message)
             Throw
         End Try
     End Sub
@@ -59,22 +59,22 @@ Public Class GoogleDriveUploader
             ' Se a pasta já existir, retorna o ID
             If resultado.Files IsNot Nothing AndAlso resultado.Files.Count > 0 Then
                 Dim pastaExistente = resultado.Files(0)
-                Form1.EscreverLog($"Pasta '{nomePasta}' já existe no Google Drive. ID: {pastaExistente.Id}")
+                BackupLogger.Escrever($"Pasta '{nomePasta}' já existe no Google Drive. ID: {pastaExistente.Id}")
                 Return pastaExistente.Id
             End If
 
             ' Caso contrário, criar a pasta
-            Form1.EscreverLog($"Pasta '{nomePasta}' não encontrada. Criando nova pasta...")
+            BackupLogger.Escrever($"Pasta '{nomePasta}' não encontrada. Criando nova pasta...")
             Dim pastaMetadata As New Google.Apis.Drive.v3.Data.File() With {
             .Name = nomePasta,
             .MimeType = "application/vnd.google-apps.folder"
         }
 
             Dim pastaCriada = driveService.Files.Create(pastaMetadata).Execute()
-            Form1.EscreverLog($"Pasta '{nomePasta}' criada com sucesso. ID: {pastaCriada.Id}")
+            BackupLogger.Escrever($"Pasta '{nomePasta}' criada com sucesso. ID: {pastaCriada.Id}")
             Return pastaCriada.Id
         Catch ex As Exception
-            Form1.EscreverLog("Erro ao obter ou criar pasta no Google Drive: " & ex.Message)
+            BackupLogger.Escrever("Erro ao obter ou criar pasta no Google Drive: " & ex.Message)
             Throw
         End Try
     End Function
@@ -137,8 +137,11 @@ Public Class GoogleDriveUploader
     '    End Try
     'End Function
     Public Function ObterServicoGoogleDrive() As DriveService
-        Dim credPath As String = Application.StartupPath & "\backup\cred.json" ' Caminho para o arquivo de credenciais
-        Dim tokenPath As String = Application.StartupPath & "\backup\token.json" ' Onde o token será salvo
+        Dim pastaDados As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupMySQL")
+        Directory.CreateDirectory(pastaDados)
+
+        Dim credPath As String = Path.Combine(pastaDados, "cred.json")
+        Dim tokenPath As String = Path.Combine(pastaDados, "token.json")
 
         Try
             ' Escopos necessários para o acesso
